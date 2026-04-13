@@ -23,9 +23,9 @@ app.use(express.json());
 
 // Mini logger: stampa ogni richiesta nel terminale
 app.use((req, res, next) => {
-    const ora = new Date().toLocaleTimeString("it-IT");
-    console.log(`[${ora}] ${req.method} ${req.url}`);
-    next();
+  const ora = new Date().toLocaleTimeString("it-IT");
+  console.log(`[${ora}] ${req.method} ${req.url}`);
+  next();
 });
 
 // ============================================================
@@ -51,15 +51,16 @@ app.use("/api/commenti", routeCommenti);
 // ============================================================
 
 app.get("/", (req, res) => {
-    res.json({
-        messaggio: "Benvenuto nel Mini JSONPlaceholder! 🚀",
-        endpoint: {
-            utenti: "/api/utenti",
-            post: "/api/post",
-            commenti: "/api/commenti"
-        },
-        suggerimento: "Usa Thunder Client o la console del browser per testare le API"
-    });
+  res.json({
+    messaggio: "Benvenuto nel Mini JSONPlaceholder! 🚀",
+    endpoint: {
+      utenti: "/api/utenti",
+      post: "/api/post",
+      commenti: "/api/commenti",
+    },
+    suggerimento:
+      "Usa Thunder Client o la console del browser per testare le API",
+  });
 });
 
 // ============================================================
@@ -67,14 +68,14 @@ app.get("/", (req, res) => {
 // ============================================================
 
 app.listen(PORT, () => {
-    console.log("╔══════════════════════════════════════════╗");
-    console.log("║   🚀 Mini JSONPlaceholder avviato!       ║");
-    console.log(`║   http://localhost:${PORT}                  ║`);
-    console.log("╠══════════════════════════════════════════╣");
-    console.log("║   Endpoint:                              ║");
-    console.log("║   GET /api/utenti                        ║");
-    console.log("║   GET /api/post                          ║");
-    console.log("║   GET /api/commenti                      ║");
-    console.log("╚══════════════════════════════════════════╝");
-    console.log("");
+  console.log("╔══════════════════════════════════════════╗");
+  console.log("║   🚀 Mini JSONPlaceholder avviato!       ║");
+  console.log(`║   http://localhost:${PORT}                  ║`);
+  console.log("╠══════════════════════════════════════════╣");
+  console.log("║   Endpoint:                              ║");
+  console.log("║   GET /api/utenti                        ║");
+  console.log("║   GET /api/post                          ║");
+  console.log("║   GET /api/commenti                      ║");
+  console.log("╚══════════════════════════════════════════╝");
+  console.log("");
 });

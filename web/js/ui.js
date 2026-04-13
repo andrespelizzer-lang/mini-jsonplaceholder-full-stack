@@ -8,21 +8,21 @@
 // ============================================================
 
 export function pulisciContenitore(contenitore) {
-    contenitore.innerHTML = "";
+  contenitore.innerHTML = "";
 }
 
 export function mostraErrore(messaggio, contenitore) {
-    const div = document.createElement("div");
-    div.className = "errore";
-    div.textContent = messaggio;
-    contenitore.prepend(div);
+  const div = document.createElement("div");
+  div.className = "errore";
+  div.textContent = messaggio;
+  contenitore.prepend(div);
 
-    // Rimuovi dopo 4 secondi
-    setTimeout(() => div.remove(), 4000);
+  // Rimuovi dopo 4 secondi
+  setTimeout(() => div.remove(), 4000);
 }
 
 function mostraVuoto(contenitore, testo) {
-    contenitore.innerHTML = `<p class="vuoto">${testo}</p>`;
+  contenitore.innerHTML = `<p class="vuoto">${testo}</p>`;
 }
 
 // ============================================================
@@ -35,17 +35,17 @@ function mostraVuoto(contenitore, testo) {
  * @param {{ onVediPost: Function, onElimina: Function }} callbacks
  */
 export function mostraUtenti(utenti, contenitore, callbacks) {
-    pulisciContenitore(contenitore);
+  pulisciContenitore(contenitore);
 
-    if (utenti.length === 0) {
-        mostraVuoto(contenitore, "Nessun utente trovato");
-        return;
-    }
+  if (utenti.length === 0) {
+    mostraVuoto(contenitore, "Nessun utente trovato");
+    return;
+  }
 
-    utenti.forEach(utente => {
-        const card = document.createElement("div");
-        card.className = "card";
-        card.innerHTML = `
+  utenti.forEach((utente) => {
+    const card = document.createElement("div");
+    card.className = "card";
+    card.innerHTML = `
             <h3>${utente.nome}</h3>
             <p>${utente.email}</p>
             <p>${utente.citta || "Nessuna citta"}</p>
@@ -55,16 +55,20 @@ export function mostraUtenti(utenti, contenitore, callbacks) {
             </div>
         `;
 
-        card.querySelector('[data-azione="vedi-post"]').addEventListener("click", () => {
-            callbacks.onVediPost(utente);
-        });
+    card
+      .querySelector('[data-azione="vedi-post"]')
+      .addEventListener("click", () => {
+        callbacks.onVediPost(utente);
+      });
 
-        card.querySelector('[data-azione="elimina"]').addEventListener("click", () => {
-            callbacks.onElimina(utente.id);
-        });
+    card
+      .querySelector('[data-azione="elimina"]')
+      .addEventListener("click", () => {
+        callbacks.onElimina(utente.id);
+      });
 
-        contenitore.appendChild(card);
-    });
+    contenitore.appendChild(card);
+  });
 }
 
 // ============================================================
@@ -77,17 +81,17 @@ export function mostraUtenti(utenti, contenitore, callbacks) {
  * @param {{ onVediCommenti: Function, onElimina: Function }} callbacks
  */
 export function mostraPost(post, contenitore, callbacks) {
-    pulisciContenitore(contenitore);
+  pulisciContenitore(contenitore);
 
-    if (post.length === 0) {
-        mostraVuoto(contenitore, "Nessun post trovato");
-        return;
-    }
+  if (post.length === 0) {
+    mostraVuoto(contenitore, "Nessun post trovato");
+    return;
+  }
 
-    post.forEach(p => {
-        const card = document.createElement("div");
-        card.className = "card";
-        card.innerHTML = `
+  post.forEach((p) => {
+    const card = document.createElement("div");
+    card.className = "card";
+    card.innerHTML = `
             <h3>${p.titolo}</h3>
             <p>${p.corpo}</p>
             <div class="azioni">
@@ -96,16 +100,20 @@ export function mostraPost(post, contenitore, callbacks) {
             </div>
         `;
 
-        card.querySelector('[data-azione="vedi-commenti"]').addEventListener("click", () => {
-            callbacks.onVediCommenti(p);
-        });
+    card
+      .querySelector('[data-azione="vedi-commenti"]')
+      .addEventListener("click", () => {
+        callbacks.onVediCommenti(p);
+      });
 
-        card.querySelector('[data-azione="elimina"]').addEventListener("click", () => {
-            callbacks.onElimina(p.id);
-        });
+    card
+      .querySelector('[data-azione="elimina"]')
+      .addEventListener("click", () => {
+        callbacks.onElimina(p.id);
+      });
 
-        contenitore.appendChild(card);
-    });
+    contenitore.appendChild(card);
+  });
 }
 
 // ============================================================
@@ -118,17 +126,17 @@ export function mostraPost(post, contenitore, callbacks) {
  * @param {{ onElimina: Function }} callbacks
  */
 export function mostraCommenti(commenti, contenitore, callbacks) {
-    pulisciContenitore(contenitore);
+  pulisciContenitore(contenitore);
 
-    if (commenti.length === 0) {
-        mostraVuoto(contenitore, "Nessun commento trovato");
-        return;
-    }
+  if (commenti.length === 0) {
+    mostraVuoto(contenitore, "Nessun commento trovato");
+    return;
+  }
 
-    commenti.forEach(c => {
-        const card = document.createElement("div");
-        card.className = "card";
-        card.innerHTML = `
+  commenti.forEach((c) => {
+    const card = document.createElement("div");
+    card.className = "card";
+    card.innerHTML = `
             <h3>${c.nome}</h3>
             <p>${c.email}</p>
             <p>${c.corpo}</p>
@@ -137,10 +145,12 @@ export function mostraCommenti(commenti, contenitore, callbacks) {
             </div>
         `;
 
-        card.querySelector('[data-azione="elimina"]').addEventListener("click", () => {
-            callbacks.onElimina(c.id);
-        });
+    card
+      .querySelector('[data-azione="elimina"]')
+      .addEventListener("click", () => {
+        callbacks.onElimina(c.id);
+      });
 
-        contenitore.appendChild(card);
-    });
+    contenitore.appendChild(card);
+  });
 }
