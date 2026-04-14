@@ -15,16 +15,16 @@ import pool from "../connessione.js";
  * SQL con filtro:    SELECT * FROM commenti WHERE postId = ?
  */
 export async function trovaCommenti(postId) {
-    if (postId) {
-        const [righe] = await pool.query(
-            "SELECT * FROM commenti WHERE postId = ?",
-            [postId]
-        );
-        return righe;
-    }
-
-    const [righe] = await pool.query("SELECT * FROM commenti");
+  if (postId) {
+    const [righe] = await pool.query(
+      "SELECT * FROM commenti WHERE postId = ?",
+      [postId],
+    );
     return righe;
+  }
+
+  const [righe] = await pool.query("SELECT * FROM commenti");
+  return righe;
 }
 
 /**
@@ -33,11 +33,8 @@ export async function trovaCommenti(postId) {
  * SQL: SELECT * FROM commenti WHERE id = ?
  */
 export async function trovaCommentoPerId(id) {
-    const [righe] = await pool.query(
-        "SELECT * FROM commenti WHERE id = ?",
-        [id]
-    );
-    return righe[0];
+  const [righe] = await pool.query("SELECT * FROM commenti WHERE id = ?", [id]);
+  return righe[0];
 }
 
 // ============================================================
@@ -50,12 +47,12 @@ export async function trovaCommentoPerId(id) {
  * SQL: INSERT INTO commenti (postId, nome, email, corpo) VALUES (?, ?, ?, ?)
  */
 export async function creaCommento({ postId, nome, email, corpo }) {
-    const [risultato] = await pool.query(
-        "INSERT INTO commenti (postId, nome, email, corpo) VALUES (?, ?, ?, ?)",
-        [postId, nome, email, corpo]
-    );
+  const [risultato] = await pool.query(
+    "INSERT INTO commenti (postId, nome, email, corpo) VALUES (?, ?, ?, ?)",
+    [postId, nome, email, corpo],
+  );
 
-    return { id: risultato.insertId, postId, nome, email, corpo };
+  return { id: risultato.insertId, postId, nome, email, corpo };
 }
 
 // ============================================================
@@ -68,13 +65,13 @@ export async function creaCommento({ postId, nome, email, corpo }) {
  * SQL: UPDATE commenti SET postId = ?, nome = ?, email = ?, corpo = ? WHERE id = ?
  */
 export async function sostituisciCommento(id, { postId, nome, email, corpo }) {
-    const [risultato] = await pool.query(
-        "UPDATE commenti SET postId = ?, nome = ?, email = ?, corpo = ? WHERE id = ?",
-        [postId, nome, email, corpo, id]
-    );
+  const [risultato] = await pool.query(
+    "UPDATE commenti SET postId = ?, nome = ?, email = ?, corpo = ? WHERE id = ?",
+    [postId, nome, email, corpo, id],
+  );
 
-    if (risultato.affectedRows === 0) return null;
-    return { id, postId, nome, email, corpo };
+  if (risultato.affectedRows === 0) return null;
+  return { id, postId, nome, email, corpo };
 }
 
 /**
@@ -83,26 +80,26 @@ export async function sostituisciCommento(id, { postId, nome, email, corpo }) {
  * SQL dinamico: UPDATE commenti SET <campo> = ?, ... WHERE id = ?
  */
 export async function aggiornaCommento(id, dati) {
-    const campiPermessi = ["postId", "nome", "email", "corpo"];
-    const aggiornamenti = [];
-    const valori = [];
+  const campiPermessi = ["postId", "nome", "email", "corpo"];
+  const aggiornamenti = [];
+  const valori = [];
 
-    for (const campo of campiPermessi) {
-        if (dati[campo] !== undefined) {
-            aggiornamenti.push(`${campo} = ?`);
-            valori.push(dati[campo]);
-        }
+  for (const campo of campiPermessi) {
+    if (dati[campo] !== undefined) {
+      aggiornamenti.push(`${campo} = ?`);
+      valori.push(dati[campo]);
     }
+  }
 
-    if (aggiornamenti.length > 0) {
-        valori.push(id);
-        await pool.query(
-            `UPDATE commenti SET ${aggiornamenti.join(", ")} WHERE id = ?`,
-            valori
-        );
-    }
+  if (aggiornamenti.length > 0) {
+    valori.push(id);
+    await pool.query(
+      `UPDATE commenti SET ${aggiornamenti.join(", ")} WHERE id = ?`,
+      valori,
+    );
+  }
 
-    return trovaCommentoPerId(id);
+  return trovaCommentoPerId(id);
 }
 
 // ============================================================
@@ -115,9 +112,9 @@ export async function aggiornaCommento(id, dati) {
  * SQL: DELETE FROM commenti WHERE id = ?
  */
 export async function eliminaCommento(id) {
-    const commento = await trovaCommentoPerId(id);
-    if (!commento) return null;
+  const commento = await trovaCommentoPerId(id);
+  if (!commento) return null;
 
-    await pool.query("DELETE FROM commenti WHERE id = ?", [id]);
-    return commento;
+  await pool.query("DELETE FROM commenti WHERE id = ?", [id]);
+  return commento;
 }

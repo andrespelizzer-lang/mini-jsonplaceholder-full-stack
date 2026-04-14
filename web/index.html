@@ -28,6 +28,12 @@
       </nav>
 
       <!-- ==================================================
+             Statistiche
+             ================================================== -->
+
+      <div id="statistiche"></div>
+
+      <!-- ==================================================
              Sezione Utenti
              ================================================== -->
       <section id="sezione-utenti">
@@ -35,6 +41,7 @@
 
         <form id="form-utente">
           <h3>Nuovo Utente</h3>
+
           <label for="utente-nome">Nome</label>
           <input
             type="text"
@@ -42,6 +49,7 @@
             placeholder="Es. Yoshi Verde"
             required
           />
+
           <label for="utente-email">Email</label>
           <input
             type="email"
@@ -49,10 +57,37 @@
             placeholder="Es. yoshi@email.com"
             required
           />
-          <label for="utente-citta">Citta (opzionale)</label>
+
+          <label for="utente-citta">Città (opzionale)</label>
           <input type="text" id="utente-citta" placeholder="Es. Isola Yoshi" />
+
+          <label for="utente-cf">Codice Fiscale</label>
+          <input
+            type="text"
+            id="utente-cf"
+            placeholder="Es. RSSMRA90A01H501A"
+            pattern="^[A-Za-z]{6}[0-9]{2}[A-Za-z][0-9]{2}[A-Za-z][0-9]{3}[A-Za-z]$"
+            maxlength="16"
+            required
+          />
+
+          <label for="utente-sesso">Sesso</label>
+          <select id="utente-sesso" required>
+            <option value="">Seleziona</option>
+            <option value="M">M</option>
+            <option value="F">F</option>
+            <option value="Altro">Altro</option>
+          </select>
+
+          <label for="utente-nascita">Data di nascita</label>
+          <input type="date" id="utente-nascita" />
+
+          <label for="utente-telefono">Telefono</label>
+          <input type="tel" id="utente-telefono" placeholder="+39..." />
+
           <button type="submit">Crea Utente</button>
         </form>
+
         <input type="text" id="ricerca-utenti" placeholder="Cerca utenti" />
 
         <div id="lista-utenti"></div>

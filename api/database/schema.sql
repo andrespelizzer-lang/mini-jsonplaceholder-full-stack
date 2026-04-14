@@ -15,6 +15,11 @@ CREATE TABLE IF NOT EXISTS utenti (
     nome    VARCHAR(100)  NOT NULL,
     email   VARCHAR(100)  NOT NULL,
     citta   VARCHAR(100)  NOT NULL DEFAULT '',
+    codiceFiscale CHAR(16) NOT NULL UNIQUE,
+    sesso ENUM('M', 'F', 'Altro') NOT NULL,
+    dataNascita DATE,
+    telefono VARCHAR(20),
+    creatoIl TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -23,6 +28,7 @@ CREATE TABLE IF NOT EXISTS post (
     userId  INT           NOT NULL,
     titolo  VARCHAR(255)  NOT NULL,
     corpo   TEXT          NOT NULL,
+    creatoIl TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (id),
     FOREIGN KEY (userId) REFERENCES utenti(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -33,6 +39,7 @@ CREATE TABLE IF NOT EXISTS commenti (
     nome    VARCHAR(100)  NOT NULL,
     email   VARCHAR(100)  NOT NULL,
     corpo   TEXT          NOT NULL,
+    creatoIl TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (id),
     FOREIGN KEY (postId) REFERENCES post(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

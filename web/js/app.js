@@ -82,7 +82,20 @@ navBottoni.commenti.addEventListener("click", async () => {
   mostraSezione("commenti");
   await caricaCommenti();
 });
+// ============================================================
+// Aggiorna statistiche
+// ============================================================
 
+async function aggiornaStatistiche() {
+  const [utenti, post, commenti] = await Promise.all([
+    api.ottieniUtenti(),
+    api.ottieniPost(),
+    api.ottieniCommenti(),
+  ]);
+  document.getElementById("statistiche").textContent =
+    `Utenti: ${utenti.length} | Post: ${post.length} | Commenti: ${commenti.length}`;
+}
+aggiornaStatistiche();
 // ============================================================
 // Caricamento dati
 // ============================================================
@@ -97,6 +110,7 @@ async function caricaUtenti() {
   } catch (err) {
     ui.mostraErrore(err.message, liste.utenti);
   }
+  aggiornaStatistiche();
 }
 
 async function caricaPost(userId) {
@@ -109,6 +123,7 @@ async function caricaPost(userId) {
   } catch (err) {
     ui.mostraErrore(err.message, liste.post);
   }
+  aggiornaStatistiche();
 }
 
 async function caricaCommenti(postId) {
@@ -120,6 +135,7 @@ async function caricaCommenti(postId) {
   } catch (err) {
     ui.mostraErrore(err.message, liste.commenti);
   }
+  aggiornaStatistiche();
 }
 
 // ============================================================
@@ -178,6 +194,7 @@ async function eliminaUtente(id) {
   } catch (err) {
     ui.mostraErrore(err.message, liste.utenti);
   }
+  aggiornaStatistiche();
 }
 
 async function eliminaPost(id) {
@@ -188,6 +205,7 @@ async function eliminaPost(id) {
   } catch (err) {
     ui.mostraErrore(err.message, liste.post);
   }
+  aggiornaStatistiche();
 }
 
 async function eliminaCommento(id) {
@@ -198,6 +216,7 @@ async function eliminaCommento(id) {
   } catch (err) {
     ui.mostraErrore(err.message, liste.commenti);
   }
+  aggiornaStatistiche();
 }
 
 // ============================================================
@@ -210,8 +229,28 @@ document.getElementById("form-utente").addEventListener("submit", async (e) => {
   const email = document.getElementById("utente-email").value.trim();
   const citta = document.getElementById("utente-citta").value.trim();
 
+  const codiceFiscale = document.getElementById("utente-cf").value.trim();
+  const sesso = document.getElementById("utente-sesso").value;
+  const dataNascita = document.getElementById("utente-nascita").value;
+  const telefono = document.getElementById("utente-telefono").value.trim();
+  const regexCF = /^[A-Z]{6}[0-9]{2}[A-Z][0-9]{2}[A-Z][0-9]{3}[A-Z]$/;
+  const cfUppercase = codiceFiscale.toUpperCase();
+
+  if (!regexCF.test(cfUppercase)) {
+    ui.mostraErrore("Codice fiscale non valido", lista);
+    return;
+  }
+
   try {
-    await api.creaUtente({ nome, email, citta });
+    await api.creaUtente({
+      nome,
+      email,
+      citta,
+      codiceFiscale,
+      sesso,
+      dataNascita,
+      telefono,
+    });
     e.target.reset();
     await caricaUtenti();
   } catch (err) {

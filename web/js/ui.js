@@ -43,29 +43,38 @@ export function mostraUtenti(utenti, contenitore, callbacks) {
   }
 
   utenti.forEach((utente) => {
+    const data = utente.creatoIl
+      ? new Date(utente.creatoIl).toLocaleString("it-IT")
+      : "-";
+
     const card = document.createElement("div");
     card.className = "card";
+
     card.innerHTML = `
-            <h3>${utente.nome}</h3>
-            <p>${utente.email}</p>
-            <p>${utente.citta || "Nessuna citta"}</p>
-            <div class="azioni">
-                <button class="btn-primario" data-azione="vedi-post">Vedi Post</button>
-                <button class="btn-pericolo" data-azione="elimina">Elimina</button>
-            </div>
-        `;
+      <h3>${utente.nome}</h3>
+      <p>${utente.email}</p>
+      <p>${utente.citta || "Nessuna citta"}</p>
+
+      <p><strong>CF:</strong> ${utente.codiceFiscale}</p>
+      <p><strong>Sesso:</strong> ${utente.sesso}</p>
+      <p><strong>Nascita:</strong> ${utente.dataNascita || "-"}</p>
+      <p><strong>Telefono:</strong> ${utente.telefono || "-"}</p>
+
+      <p><strong>Creato il:</strong> ${data}</p>
+
+      <div class="azioni">
+        <button class="btn-primario" data-azione="vedi-post">Vedi Post</button>
+        <button class="btn-pericolo" data-azione="elimina">Elimina</button>
+      </div>
+    `;
 
     card
       .querySelector('[data-azione="vedi-post"]')
-      .addEventListener("click", () => {
-        callbacks.onVediPost(utente);
-      });
+      .addEventListener("click", () => callbacks.onVediPost(utente));
 
     card
       .querySelector('[data-azione="elimina"]')
-      .addEventListener("click", () => {
-        callbacks.onElimina(utente.id);
-      });
+      .addEventListener("click", () => callbacks.onElimina(utente.id));
 
     contenitore.appendChild(card);
   });
