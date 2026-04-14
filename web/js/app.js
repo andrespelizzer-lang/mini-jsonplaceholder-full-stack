@@ -44,6 +44,10 @@ const titoli = {
   commenti: document.getElementById("titolo-commenti"),
 };
 
+const ricerca = {
+  utenti: document.getElementById("ricerca-utenti"),
+};
+
 // ============================================================
 // Navigazione
 // ============================================================
@@ -255,6 +259,19 @@ document
       ui.mostraErrore(err.message, liste.commenti);
     }
   });
+// ============================================================
+// Ricerca - ricerca utenti in tempo reale
+// ============================================================
+
+ricerca.utenti.addEventListener("input", (e) => {
+  const testo = e.target.value.toLowerCase();
+  const cards = document.querySelectorAll("#lista-utenti .card");
+
+  cards.forEach((card) => {
+    const contenuto = card.textContent.toLowerCase();
+    card.style.display = contenuto.includes(testo) ? "" : "none"; // se non trova niente display:none , se invece si display visibile
+  });
+});
 
 // ============================================================
 // Avvio — Carica la lista utenti all'apertura

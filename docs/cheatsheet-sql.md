@@ -72,14 +72,11 @@ Nel codice non scriviamo mai i valori direttamente nella query. Usiamo i **place
 
 ```js
 // ✅ CORRETTO — query parametrizzata (sicura)
-const [righe] = await pool.query(
-    "SELECT * FROM utenti WHERE id = ?",
-    [id]
-);
+const [righe] = await pool.query("SELECT * FROM utenti WHERE id = ?", [id]);
 
 // ❌ SBAGLIATO — concatenazione di stringhe (vulnerabile a SQL injection!)
 const [righe] = await pool.query(
-    `SELECT * FROM utenti WHERE id = ${id}`  // MAI fare questo!
+  `SELECT * FROM utenti WHERE id = ${id}`, // MAI fare questo!
 );
 ```
 
@@ -90,8 +87,8 @@ I `?` vengono sostituiti automaticamente da `mysql2` con i valori dell'array. Qu
 ```js
 // I ? vengono sostituiti in ordine con i valori dell'array
 const [risultato] = await pool.query(
-    "INSERT INTO utenti (nome, email, citta) VALUES (?, ?, ?)",
-    [nome, email, citta]
+  "INSERT INTO utenti (nome, email, citta) VALUES (?, ?, ?)",
+  [nome, email, citta],
 );
 ```
 
@@ -113,8 +110,8 @@ const [righe] = await pool.query("SELECT * FROM utenti WHERE id = ?", [1]);
 
 ```js
 const [risultato] = await pool.query(
-    "INSERT INTO utenti (nome, email, citta) VALUES (?, ?, ?)",
-    ["Yoshi", "yoshi@email.com", "Isola"]
+  "INSERT INTO utenti (nome, email, citta) VALUES (?, ?, ?)",
+  ["Yoshi", "yoshi@email.com", "Isola"],
 );
 // risultato.insertId = 6  (l'id generato da AUTO_INCREMENT)
 ```
@@ -123,8 +120,8 @@ const [risultato] = await pool.query(
 
 ```js
 const [risultato] = await pool.query(
-    "UPDATE utenti SET nome = ? WHERE id = ?",
-    ["Mario Jr.", 1]
+  "UPDATE utenti SET nome = ? WHERE id = ?",
+  ["Mario Jr.", 1],
 );
 // risultato.affectedRows = 1  (una riga modificata)
 // risultato.affectedRows = 0  (nessuna riga trovata con quell'id)
@@ -132,20 +129,20 @@ const [risultato] = await pool.query(
 
 ## Tipi di dati usati nel progetto
 
-| Tipo SQL         | Significato                 | Esempio nel progetto       |
-|------------------|-----------------------------|----------------------------|
-| `INT`            | Numero intero               | `id`, `userId`, `postId`   |
-| `VARCHAR(100)`   | Testo fino a 100 caratteri  | `nome`, `email`, `citta`   |
-| `VARCHAR(255)`   | Testo fino a 255 caratteri  | `titolo`                   |
-| `TEXT`           | Testo lungo                 | `corpo`                    |
+| Tipo SQL       | Significato                | Esempio nel progetto     |
+| -------------- | -------------------------- | ------------------------ |
+| `INT`          | Numero intero              | `id`, `userId`, `postId` |
+| `VARCHAR(100)` | Testo fino a 100 caratteri | `nome`, `email`, `citta` |
+| `VARCHAR(255)` | Testo fino a 255 caratteri | `titolo`                 |
+| `TEXT`         | Testo lungo                | `corpo`                  |
 
 ## Vincoli (constraints)
 
-| Vincolo            | Significato                                              |
-|--------------------|----------------------------------------------------------|
-| `PRIMARY KEY`      | Identifica in modo univoco ogni riga                     |
-| `NOT NULL`         | Il campo è obbligatorio                                  |
-| `AUTO_INCREMENT`   | MySQL genera il valore automaticamente (per gli id)      |
-| `DEFAULT ''`       | Valore predefinito se non specificato                     |
-| `FOREIGN KEY`      | Collega un campo a un'altra tabella                      |
+| Vincolo             | Significato                                               |
+| ------------------- | --------------------------------------------------------- |
+| `PRIMARY KEY`       | Identifica in modo univoco ogni riga                      |
+| `NOT NULL`          | Il campo è obbligatorio                                   |
+| `AUTO_INCREMENT`    | MySQL genera il valore automaticamente (per gli id)       |
+| `DEFAULT ''`        | Valore predefinito se non specificato                     |
+| `FOREIGN KEY`       | Collega un campo a un'altra tabella                       |
 | `ON DELETE CASCADE` | Se il record padre viene eliminato, anche i figli lo sono |

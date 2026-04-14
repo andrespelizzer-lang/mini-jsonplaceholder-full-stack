@@ -12,12 +12,12 @@ Difficolta: ⭐ facile | ⭐⭐ medio | ⭐⭐⭐ avanzato
 
 Aggiungere nuovi campi alla tabella `utenti`:
 
-| Campo             | Tipo SQL         | Obbligatorio | Note                                           |
-|-------------------|------------------|--------------|-------------------------------------------------|
-| `codiceFiscale`   | `CHAR(16)`       | Si           | Esattamente 16 caratteri alfanumerici           |
-| `sesso`           | `ENUM('M','F','Altro')` | Si    | Solo uno dei tre valori possibili               |
-| `dataNascita`     | `DATE`           | No           | Formato: `YYYY-MM-DD` (es. `1990-05-15`)       |
-| `telefono`        | `VARCHAR(20)`    | No           | Numeri, spazi, e prefisso `+` internazionale    |
+| Campo           | Tipo SQL                | Obbligatorio | Note                                         |
+| --------------- | ----------------------- | ------------ | -------------------------------------------- |
+| `codiceFiscale` | `CHAR(16)`              | Si           | Esattamente 16 caratteri alfanumerici        |
+| `sesso`         | `ENUM('M','F','Altro')` | Si           | Solo uno dei tre valori possibili            |
+| `dataNascita`   | `DATE`                  | No           | Formato: `YYYY-MM-DD` (es. `1990-05-15`)     |
+| `telefono`      | `VARCHAR(20)`           | No           | Numeri, spazi, e prefisso `+` internazionale |
 
 ### File da modificare
 
@@ -85,12 +85,14 @@ Regex semplificata: `^[A-Z]{6}[0-9]{2}[A-Z][0-9]{2}[A-Z][0-9]{3}[A-Z]$`
 Per la validazione nel form HTML, potete usare l'attributo `pattern`:
 
 ```html
-<input type="text"
-       id="utente-cf"
-       placeholder="Es. RSSMRA90A01H501A"
-       pattern="^[A-Za-z]{6}[0-9]{2}[A-Za-z][0-9]{2}[A-Za-z][0-9]{3}[A-Za-z]$"
-       maxlength="16"
-       required>
+<input
+  type="text"
+  id="utente-cf"
+  placeholder="Es. RSSMRA90A01H501A"
+  pattern="^[A-Za-z]{6}[0-9]{2}[A-Za-z][0-9]{2}[A-Za-z][0-9]{3}[A-Za-z]$"
+  maxlength="16"
+  required
+/>
 ```
 
 Per la validazione in JavaScript (in `app.js`):
@@ -100,8 +102,8 @@ const regexCF = /^[A-Z]{6}[0-9]{2}[A-Z][0-9]{2}[A-Z][0-9]{3}[A-Z]$/;
 const cfUppercase = codiceFiscale.toUpperCase();
 
 if (!regexCF.test(cfUppercase)) {
-    ui.mostraErrore("Codice fiscale non valido", lista);
-    return;
+  ui.mostraErrore("Codice fiscale non valido", lista);
+  return;
 }
 ```
 
@@ -110,10 +112,10 @@ Per il campo sesso nel HTML:
 ```html
 <label for="utente-sesso">Sesso</label>
 <select id="utente-sesso" required>
-    <option value="">-- Seleziona --</option>
-    <option value="M">Maschio</option>
-    <option value="F">Femmina</option>
-    <option value="Altro">Altro</option>
+  <option value="">-- Seleziona --</option>
+  <option value="M">Maschio</option>
+  <option value="F">Femmina</option>
+  <option value="Altro">Altro</option>
 </select>
 ```
 
@@ -144,19 +146,22 @@ Aggiungere un bottone "Modifica" ad ogni card utente. Cliccandolo, il form "Nuov
 ### File da modificare
 
 1. **`web/js/api.js`** — aggiungere la funzione:
+
    ```js
    export async function aggiornaUtente(id, dati) {
-       return chiamataApi(`/utenti/${id}`, {
-           method: "PUT",
-           body: JSON.stringify(dati),
-       });
+     return chiamataApi(`/utenti/${id}`, {
+       method: "PUT",
+       body: JSON.stringify(dati),
+     });
    }
    ```
 
 2. **`web/js/ui.js`** — aggiungere il bottone "Modifica" nelle card utenti:
+
    ```html
    <button class="btn-secondario" data-azione="modifica">Modifica</button>
    ```
+
    Aggiungere il callback `onModifica` nei callbacks.
 
 3. **`web/js/app.js`** — gestire la logica modifica/creazione:
@@ -166,14 +171,15 @@ Aggiungere un bottone "Modifica" ad ogni card utente. Cliccandolo, il form "Nuov
    - Creare una funzione `resetFormUtente()` per tornare alla modalita creazione
 
 4. **`web/stile.css`** — aggiungere lo stile per `.btn-secondario`:
+
    ```css
    .btn-secondario {
-       background: #f1f5f9;
-       color: #1e293b;
-       border: 1px solid #e2e8f0;
+     background: #f1f5f9;
+     color: #1e293b;
+     border: 1px solid #e2e8f0;
    }
    .btn-secondario:hover {
-       background: #e2e8f0;
+     background: #e2e8f0;
    }
    ```
 
@@ -185,10 +191,10 @@ Per pre-compilare il form:
 
 ```js
 function compilaFormUtente(utente) {
-    document.getElementById("utente-nome").value = utente.nome;
-    document.getElementById("utente-email").value = utente.email;
-    document.getElementById("utente-citta").value = utente.citta;
-    // ... altri campi
+  document.getElementById("utente-nome").value = utente.nome;
+  document.getElementById("utente-email").value = utente.email;
+  document.getElementById("utente-citta").value = utente.citta;
+  // ... altri campi
 }
 ```
 
@@ -196,17 +202,17 @@ Per distinguere creazione da modifica nel submit:
 
 ```js
 document.getElementById("form-utente").addEventListener("submit", async (e) => {
-    e.preventDefault();
-    // ... leggi i campi ...
+  e.preventDefault();
+  // ... leggi i campi ...
 
-    if (utenteInModifica) {
-        await api.aggiornaUtente(utenteInModifica.id, dati);
-        utenteInModifica = null;
-        resetFormUtente();
-    } else {
-        await api.creaUtente(dati);
-    }
-    // ... ricarica lista ...
+  if (utenteInModifica) {
+    await api.aggiornaUtente(utenteInModifica.id, dati);
+    utenteInModifica = null;
+    resetFormUtente();
+  } else {
+    await api.creaUtente(dati);
+  }
+  // ... ricarica lista ...
 });
 ```
 
@@ -243,13 +249,13 @@ Il filtro funziona lato client (non serve chiamare l'API):
 
 ```js
 document.getElementById("ricerca-utenti").addEventListener("input", (e) => {
-    const testo = e.target.value.toLowerCase();
-    const cards = document.querySelectorAll("#lista-utenti .card");
+  const testo = e.target.value.toLowerCase();
+  const cards = document.querySelectorAll("#lista-utenti .card");
 
-    cards.forEach(card => {
-        const contenuto = card.textContent.toLowerCase();
-        card.style.display = contenuto.includes(testo) ? "" : "none";
-    });
+  cards.forEach((card) => {
+    const contenuto = card.textContent.toLowerCase();
+    card.style.display = contenuto.includes(testo) ? "" : "none";
+  });
 });
 ```
 
@@ -282,13 +288,13 @@ I numeri si aggiornano automaticamente quando create o eliminate risorse.
 
 ```js
 async function aggiornaStatistiche() {
-    const [utenti, post, commenti] = await Promise.all([
-        api.ottieniUtenti(),
-        api.ottieniPost(),
-        api.ottieniCommenti()
-    ]);
-    document.getElementById("statistiche").textContent =
-        `Utenti: ${utenti.length} | Post: ${post.length} | Commenti: ${commenti.length}`;
+  const [utenti, post, commenti] = await Promise.all([
+    api.ottieniUtenti(),
+    api.ottieniPost(),
+    api.ottieniCommenti(),
+  ]);
+  document.getElementById("statistiche").textContent =
+    `Utenti: ${utenti.length} | Post: ${post.length} | Commenti: ${commenti.length}`;
 }
 ```
 
@@ -323,9 +329,9 @@ Per formattare la data nel frontend:
 ```js
 const data = new Date(elemento.creatoIl);
 const formattata = data.toLocaleDateString("it-IT", {
-    day: "numeric",
-    month: "long",
-    year: "numeric"
+  day: "numeric",
+  month: "long",
+  year: "numeric",
 });
 // → "15 maggio 2026"
 ```

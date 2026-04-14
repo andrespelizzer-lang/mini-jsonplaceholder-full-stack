@@ -3,6 +3,7 @@
 ## Perche serviva un database?
 
 Con il vecchio approccio (array in memoria), i dati:
+
 - **Si perdevano** ad ogni riavvio del server
 - **Non erano condivisibili** tra piu istanze del server
 - **Non avevano vincoli** (potevi creare un post con `userId: 999` anche se l'utente non esisteva)
@@ -54,16 +55,16 @@ const rimosso = await eliminaUtente(id);
 
 ## Tabella di confronto: Array vs MySQL
 
-| Operazione       | Array (prima)                    | MySQL (adesso)                           |
-|------------------|----------------------------------|------------------------------------------|
-| Leggere tutti    | `utenti` (accesso diretto)       | `SELECT * FROM utenti`                   |
-| Filtrare         | `.filter(u => u.citta === ...)`  | `WHERE LOWER(citta) = LOWER(?)`          |
-| Cercare per id   | `.find(u => u.id === id)`        | `WHERE id = ?`                           |
-| Creare           | `prossimoId()` + `.push()`       | `INSERT INTO ... VALUES (?, ?)`          |
-| Aggiornare tutto | `array[indice] = { ... }`        | `UPDATE ... SET ... WHERE id = ?`        |
-| Aggiornare campo | `utente.nome = nome`             | `UPDATE ... SET nome = ? WHERE id = ?`   |
-| Eliminare        | `.splice(indice, 1)`             | `DELETE FROM ... WHERE id = ?`           |
-| Generare ID      | `contatori[risorsa]++`           | `AUTO_INCREMENT` (lo fa MySQL)           |
+| Operazione       | Array (prima)                   | MySQL (adesso)                         |
+| ---------------- | ------------------------------- | -------------------------------------- |
+| Leggere tutti    | `utenti` (accesso diretto)      | `SELECT * FROM utenti`                 |
+| Filtrare         | `.filter(u => u.citta === ...)` | `WHERE LOWER(citta) = LOWER(?)`        |
+| Cercare per id   | `.find(u => u.id === id)`       | `WHERE id = ?`                         |
+| Creare           | `prossimoId()` + `.push()`      | `INSERT INTO ... VALUES (?, ?)`        |
+| Aggiornare tutto | `array[indice] = { ... }`       | `UPDATE ... SET ... WHERE id = ?`      |
+| Aggiornare campo | `utente.nome = nome`            | `UPDATE ... SET nome = ? WHERE id = ?` |
+| Eliminare        | `.splice(indice, 1)`            | `DELETE FROM ... WHERE id = ?`         |
+| Generare ID      | `contatori[risorsa]++`          | `AUTO_INCREMENT` (lo fa MySQL)         |
 
 ## Concetti nuovi introdotti
 
@@ -74,13 +75,13 @@ Le operazioni sul database sono **asincrone**: il server manda la query a MySQL 
 ```js
 // Prima: sincrono (immediato)
 router.get("/", (req, res) => {
-    res.json(utenti);
+  res.json(utenti);
 });
 
 // Adesso: asincrono (attende la risposta dal database)
 router.get("/", async (req, res) => {
-    const risultato = await trovaUtenti();
-    res.json(risultato);
+  const risultato = await trovaUtenti();
+  res.json(risultato);
 });
 ```
 
@@ -93,13 +94,13 @@ Le operazioni sul database possono fallire (connessione persa, errore SQL, ecc).
 
 ```js
 router.get("/", async (req, res) => {
-    try {
-        const risultato = await trovaUtenti();
-        res.json(risultato);
-    } catch (errore) {
-        console.error("Errore:", errore);
-        res.status(500).json({ errore: "Errore interno del server" });
-    }
+  try {
+    const risultato = await trovaUtenti();
+    res.json(risultato);
+  } catch (errore) {
+    console.error("Errore:", errore);
+    res.status(500).json({ errore: "Errore interno del server" });
+  }
 });
 ```
 
@@ -113,15 +114,16 @@ Aprire una connessione al database per ogni richiesta e lento. Un **pool** manti
 
 ```js
 const pool = mysql.createPool({
-    host: "localhost",
-    user: "studente",
-    password: "password123",
-    database: "mini_jsonplaceholder",
-    connectionLimit: 10,  // massimo 10 connessioni simultanee
+  host: "localhost",
+  user: "studente",
+  password: "password123",
+  database: "mini_jsonplaceholder",
+  connectionLimit: 10, // massimo 10 connessioni simultanee
 });
 ```
 
 Quando una route fa `await pool.query(...)`, il pool:
+
 1. Prende una connessione libera dal gruppo
 2. Esegue la query
 3. Restituisce la connessione al gruppo per riutilizzarla
@@ -153,12 +155,12 @@ DB_PASSWORD=password123
 E le leggiamo nel codice con `process.env`:
 
 ```js
-import "dotenv/config";  // Carica il file .env
+import "dotenv/config"; // Carica il file .env
 
 const pool = mysql.createPool({
-    host: process.env.DB_HOST,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
 });
 ```
 
@@ -180,6 +182,7 @@ FOREIGN KEY (userId) REFERENCES utenti(id) ON DELETE CASCADE
 ```
 
 Questo significa:
+
 - Non puoi creare un post con un `userId` che non esiste
 - Se elimini un utente, **tutti i suoi post vengono eliminati automaticamente**
 - E i commenti di quei post vengono eliminati a catena
@@ -207,6 +210,7 @@ api/
 ```
 
 La separazione e chiara:
+
 - **`database/connessione.js`** — come ci colleghiamo al database
 - **`database/queries/*.js`** — cosa chiediamo al database (le query SQL)
 - **`routes/*.js`** — come gestiamo le richieste HTTP (validazione, risposte)
