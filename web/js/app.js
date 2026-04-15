@@ -11,6 +11,8 @@ import * as ui from "./ui.js";
 
 let utenteSelezionato = null; // { id, nome }
 let postSelezionato = null; // { id, titolo }
+let paginaPost = 1;
+const limitePost = 5;
 
 // ============================================================
 // Riferimenti DOM
@@ -33,6 +35,9 @@ const liste = {
   post: document.getElementById("lista-post"),
   commenti: document.getElementById("lista-commenti"),
 };
+const paginazionePost = document.createElement("div");
+paginazionePost.id = "paginazione-post";
+liste.post.after(paginazionePost);
 
 const breadcrumbs = {
   post: document.getElementById("breadcrumb-post"),
@@ -82,6 +87,7 @@ navBottoni.commenti.addEventListener("click", async () => {
   mostraSezione("commenti");
   await caricaCommenti();
 });
+
 // ============================================================
 // Aggiorna statistiche
 // ============================================================
@@ -96,6 +102,7 @@ async function aggiornaStatistiche() {
     `Utenti: ${utenti.length} | Post: ${post.length} | Commenti: ${commenti.length}`;
 }
 aggiornaStatistiche();
+
 // ============================================================
 // Caricamento dati
 // ============================================================
@@ -106,6 +113,7 @@ async function caricaUtenti() {
     ui.mostraUtenti(utenti, liste.utenti, {
       onVediPost: vediPostDiUtente,
       onElimina: eliminaUtente,
+      onModifica: attivaModalitaModifica, // aggiunto per l'esercizio 3
     });
   } catch (err) {
     ui.mostraErrore(err.message, liste.utenti);
@@ -115,8 +123,8 @@ async function caricaUtenti() {
 
 async function caricaPost(userId) {
   try {
-    const post = await api.ottieniPost(userId);
-    ui.mostraPost(post, liste.post, {
+    const risposta = await api.ottieniPost(userId, paginaPost, limitePost);
+    ui.mostraPost(risposta.dati, liste.post, {
       onVediCommenti: vediCommentiDiPost,
       onElimina: eliminaPost,
     });
@@ -125,6 +133,34 @@ async function caricaPost(userId) {
   }
   aggiornaStatistiche();
 }
+function renderPaginazione(totale) {
+  const totalePagine = Math.ceil(totale / limitePost);
+
+  paginazionePost.innerHTML = `
+    <button id="btn-prev-post" ${paginaPost === 1 ? "disabled" : ""}>Precedente</button>
+    <span>Pagina ${paginaPost} di ${totalePagine}</span>
+    <button id="btn-next-post" ${paginaPost === totalePagine ? "disabled" : ""}>Successiva</button>
+  `;
+
+  document.getElementById("btn-prev-post").onclick = async () => {
+    if (paginaPost > 1) {
+      paginaPost--;
+      await caricaPost(utenteSelezionato?.id);
+    }
+  };
+
+  document.getElementById("btn-next-post").onclick = async () => {
+    if (paginaPost < totalePagine) {
+      paginaPost++;
+      await caricaPost(utenteSelezionato?.id);
+    }
+  };
+}
+paginazionePost.innerHTML = `
+    <button id="btn-prev-post">Precedente</button>
+    <span>Pagina ${paginaPost} di ${totalePagine}</span>
+    <button id="btn-next-post">Successiva</button>
+  `;
 
 async function caricaCommenti(postId) {
   try {
@@ -220,43 +256,85 @@ async function eliminaCommento(id) {
 }
 
 // ============================================================
-// Form — Creazione
+// Modifica utenti — esercizio 3
+// ============================================================
+
+let utenteInModifica = null; // contiene l'utente che stiamo modificando, null se stiamo creando
+
+// Chiamata quando si clicca "Modifica" su una card — popola il form con i dati dell'utente
+function attivaModalitaModifica(utente) {
+  utenteInModifica = utente;
+  document.getElementById("utente-nome").value = utente.nome;
+  document.getElementById("utente-email").value = utente.email;
+  document.getElementById("utente-citta").value = utente.citta || "";
+  document.getElementById("utente-cf").value = utente.codiceFiscale;
+  document.getElementById("utente-sesso").value = utente.sesso;
+  document.getElementById("utente-nascita").value = utente.dataNascita || "";
+  document.getElementById("utente-telefono").value = utente.telefono || "";
+}
+
+// Riporta il form alla modalità creazione
+function resetFormUtente() {
+  document.getElementById("form-utente").reset();
+  utenteInModifica = null;
+}
+
+document.getElementById("btn-annulla-utente").addEventListener("click", () => {
+  resetFormUtente();
+});
+
+// ============================================================
+// Form — Creazione e Modifica utenti (un solo listener)
 // ============================================================
 
 document.getElementById("form-utente").addEventListener("submit", async (e) => {
   e.preventDefault();
+
   const nome = document.getElementById("utente-nome").value.trim();
   const email = document.getElementById("utente-email").value.trim();
   const citta = document.getElementById("utente-citta").value.trim();
-
   const codiceFiscale = document.getElementById("utente-cf").value.trim();
   const sesso = document.getElementById("utente-sesso").value;
   const dataNascita = document.getElementById("utente-nascita").value;
   const telefono = document.getElementById("utente-telefono").value.trim();
+
   const regexCF = /^[A-Z]{6}[0-9]{2}[A-Z][0-9]{2}[A-Z][0-9]{3}[A-Z]$/;
   const cfUppercase = codiceFiscale.toUpperCase();
 
   if (!regexCF.test(cfUppercase)) {
-    ui.mostraErrore("Codice fiscale non valido", lista);
+    ui.mostraErrore("Codice fiscale non valido", liste.utenti);
     return;
   }
 
+  const dati = {
+    nome,
+    email,
+    citta,
+    codiceFiscale,
+    sesso,
+    dataNascita,
+    telefono,
+  };
+
   try {
-    await api.creaUtente({
-      nome,
-      email,
-      citta,
-      codiceFiscale,
-      sesso,
-      dataNascita,
-      telefono,
-    });
-    e.target.reset();
-    await caricaUtenti();
+    if (utenteInModifica) {
+      // modalità modifica → PUT
+      await api.aggiornaUtente(utenteInModifica.id, dati);
+      resetFormUtente();
+    } else {
+      // modalità creazione → POST
+      await api.creaUtente(dati);
+      e.target.reset();
+    }
+    await caricaUtenti(); // ricarica la lista in entrambi i casi
   } catch (err) {
     ui.mostraErrore(err.message, liste.utenti);
   }
 });
+
+// ============================================================
+// Form — Creazione post
+// ============================================================
 
 document.getElementById("form-post").addEventListener("submit", async (e) => {
   e.preventDefault();
@@ -267,7 +345,6 @@ document.getElementById("form-post").addEventListener("submit", async (e) => {
   try {
     await api.creaPost({ userId, titolo, corpo });
     e.target.reset();
-    // Mantieni il userId pre-compilato se in drill-down
     if (utenteSelezionato) {
       document.getElementById("post-userId").value = utenteSelezionato.id;
     }
@@ -276,6 +353,10 @@ document.getElementById("form-post").addEventListener("submit", async (e) => {
     ui.mostraErrore(err.message, liste.post);
   }
 });
+
+// ============================================================
+// Form — Creazione commenti
+// ============================================================
 
 document
   .getElementById("form-commento")
@@ -289,7 +370,6 @@ document
     try {
       await api.creaCommento({ postId, nome, email, corpo });
       e.target.reset();
-      // Mantieni il postId pre-compilato se in drill-down
       if (postSelezionato) {
         document.getElementById("commento-postId").value = postSelezionato.id;
       }
@@ -298,6 +378,7 @@ document
       ui.mostraErrore(err.message, liste.commenti);
     }
   });
+
 // ============================================================
 // Ricerca - ricerca utenti in tempo reale
 // ============================================================
@@ -308,7 +389,7 @@ ricerca.utenti.addEventListener("input", (e) => {
 
   cards.forEach((card) => {
     const contenuto = card.textContent.toLowerCase();
-    card.style.display = contenuto.includes(testo) ? "" : "none"; // se non trova niente display:none , se invece si display visibile
+    card.style.display = contenuto.includes(testo) ? "" : "none";
   });
 });
 

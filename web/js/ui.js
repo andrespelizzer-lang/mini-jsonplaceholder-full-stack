@@ -32,7 +32,7 @@ function mostraVuoto(contenitore, testo) {
 /**
  * @param {Array} utenti
  * @param {HTMLElement} contenitore
- * @param {{ onVediPost: Function, onElimina: Function }} callbacks
+ * @param {{ onVediPost: Function, onElimina: Function, onModifica: Function, }} callbacks
  */
 export function mostraUtenti(utenti, contenitore, callbacks) {
   pulisciContenitore(contenitore);
@@ -44,7 +44,9 @@ export function mostraUtenti(utenti, contenitore, callbacks) {
 
   utenti.forEach((utente) => {
     const data = utente.creatoIl
-      ? new Date(utente.creatoIl).toLocaleString("it-IT")
+      ? new Date(utente.creatoIl).toLocaleString("it-IT", {
+          timeZone: "Europe/Rome",
+        })
       : "-";
 
     const card = document.createElement("div");
@@ -57,7 +59,11 @@ export function mostraUtenti(utenti, contenitore, callbacks) {
 
       <p><strong>CF:</strong> ${utente.codiceFiscale}</p>
       <p><strong>Sesso:</strong> ${utente.sesso}</p>
-      <p><strong>Nascita:</strong> ${utente.dataNascita || "-"}</p>
+      <p><strong>Nascita:</strong> ${
+        utente.dataNascita
+          ? new Date(utente.dataNascita).toLocaleDateString("it-IT")
+          : "-"
+      }</p>
       <p><strong>Telefono:</strong> ${utente.telefono || "-"}</p>
 
       <p><strong>Creato il:</strong> ${data}</p>
@@ -65,6 +71,7 @@ export function mostraUtenti(utenti, contenitore, callbacks) {
       <div class="azioni">
         <button class="btn-primario" data-azione="vedi-post">Vedi Post</button>
         <button class="btn-pericolo" data-azione="elimina">Elimina</button>
+        <button class="btn-secondario" data-azione="modifica">Modifica</button>
       </div>
     `;
 
@@ -75,6 +82,10 @@ export function mostraUtenti(utenti, contenitore, callbacks) {
     card
       .querySelector('[data-azione="elimina"]')
       .addEventListener("click", () => callbacks.onElimina(utente.id));
+
+    card
+      .querySelector('[data-azione="modifica"]')
+      .addEventListener("click", () => callbacks.onModifica(utente));
 
     contenitore.appendChild(card);
   });
@@ -98,11 +109,18 @@ export function mostraPost(post, contenitore, callbacks) {
   }
 
   post.forEach((p) => {
+    const data = p.creatoIl
+      ? new Date(p.creatoIl).toLocaleString("it-IT", {
+          timeZone: "Europe/Rome",
+        })
+      : "-";
+
     const card = document.createElement("div");
     card.className = "card";
     card.innerHTML = `
             <h3>${p.titolo}</h3>
             <p>${p.corpo}</p>
+             <p><strong>Creato il:</strong> ${data}</p>
             <div class="azioni">
                 <button class="btn-primario" data-azione="vedi-commenti">Vedi Commenti</button>
                 <button class="btn-pericolo" data-azione="elimina">Elimina</button>
@@ -143,12 +161,18 @@ export function mostraCommenti(commenti, contenitore, callbacks) {
   }
 
   commenti.forEach((c) => {
+    const data = c.creatoIl
+      ? new Date(c.creatoIl).toLocaleString("it-IT", {
+          timeZone: "Europe/Rome",
+        })
+      : "-";
     const card = document.createElement("div");
     card.className = "card";
     card.innerHTML = `
             <h3>${c.nome}</h3>
             <p>${c.email}</p>
             <p>${c.corpo}</p>
+            <p><strong>Creato il:</strong> ${data}</p>
             <div class="azioni">
                 <button class="btn-pericolo" data-azione="elimina">Elimina</button>
             </div>

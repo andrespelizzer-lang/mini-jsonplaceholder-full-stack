@@ -192,6 +192,14 @@ section h2 {
 .btn-pericolo:hover {
   background: var(--colore-pericolo-scuro);
 }
+.btn-secondario {
+  background: #f1f5f9;
+  color: #1e293b;
+  border: 1px solid #e2e8f0;
+}
+.btn-secondario:hover {
+  background: #e2e8f0;
+}
 
 /* ============================================================
    Form

@@ -12,6 +12,7 @@ services:
       MYSQL_DATABASE: ${MYSQL_DATABASE:-mini_jsonplaceholder}
       MYSQL_USER: ${MYSQL_USER:-studente}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD:-password123}
+      TZ: Europe/Rome
     volumes:
       - mysql_data:/var/lib/mysql
       - ./api/database/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql
