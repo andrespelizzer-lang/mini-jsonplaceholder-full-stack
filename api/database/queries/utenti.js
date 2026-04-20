@@ -10,6 +10,7 @@
 //   risultato.affectedRows     → quante righe sono state modificate da UPDATE/DELETE
 
 import pool from "../connessione.js";
+import bcrypt from "bcrypt";
 
 // ============================================================
 // SELECT — Lettura
@@ -30,7 +31,9 @@ export async function trovaUtenti(citta) {
     return righe;
   }
 
-  const [righe] = await pool.query("SELECT * FROM utenti");
+  const [righe] = await pool.query(
+    "SELECT id, nome, email, citta, codiceFiscale, sesso, dataNascita, telefono FROM utenti",
+  );
   return righe;
 }
 
@@ -63,10 +66,21 @@ export async function creaUtente({
   sesso,
   dataNascita,
   telefono,
+  password,
 }) {
+  const hash = await bcrypt.hash(password, 10);
   const [risultato] = await pool.query(
-    "INSERT INTO utenti (nome, email, citta, codiceFiscale, sesso, dataNascita, telefono) VALUES (?, ?, ?, ?, ?, ?, ?)",
-    [nome, email, citta || "", codiceFiscale, sesso, dataNascita, telefono],
+    "INSERT INTO utenti (nome, email, citta, codiceFiscale, sesso, dataNascita, telefono, password) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+    [
+      nome,
+      email,
+      citta || "",
+      codiceFiscale,
+      sesso,
+      dataNascita,
+      telefono,
+      hash,
+    ],
   );
 
   return {
@@ -93,11 +107,21 @@ export async function creaUtente({
  */
 export async function sostituisciUtente(
   id,
-  { nome, email, citta, codiceFiscale, sesso, dataNascita, telefono },
+  { nome, email, citta, codiceFiscale, sesso, dataNascita, telefono, password },
 ) {
   const [risultato] = await pool.query(
-    "UPDATE utenti SET nome = ?, email = ?, citta = ?, codiceFiscale = ?, sesso = ?, dataNascita = ?, telefono = ? WHERE id = ?",
-    [nome, email, citta || "", codiceFiscale, sesso, dataNascita, telefono, id],
+    "UPDATE utenti SET nome = ?, email = ?, citta = ?, codiceFiscale = ?, sesso = ?, dataNascita = ?, telefono = ?, password = ? WHERE id = ?",
+    [
+      nome,
+      email,
+      citta || "",
+      codiceFiscale,
+      sesso,
+      dataNascita,
+      telefono,
+      password,
+      id,
+    ],
   );
 
   if (risultato.affectedRows === 0) return null;
@@ -128,6 +152,7 @@ export async function aggiornaUtente(id, dati) {
     "sesso",
     "dataNascita",
     "telefono",
+    "password",
   ];
   const aggiornamenti = [];
   const valori = [];

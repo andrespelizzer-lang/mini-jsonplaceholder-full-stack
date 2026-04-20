@@ -73,13 +73,28 @@ router.get("/:id", async (req, res) => {
 
 router.post("/", async (req, res) => {
   try {
-    const { nome, email, citta, codiceFiscale, sesso, dataNascita, telefono } =
-      req.body;
+    const {
+      nome,
+      email,
+      citta,
+      codiceFiscale,
+      sesso,
+      dataNascita,
+      telefono,
+      password,
+    } = req.body;
 
-    if (!nome || !email || !codiceFiscale || !sesso) {
+    if (
+      !nome ||
+      !email ||
+      !codiceFiscale ||
+      !sesso ||
+      !password ||
+      password.length < 8
+    ) {
       return res.status(400).json({
         errore:
-          "I campi 'nome' e 'email','codiceFiscale','sesso' sono obbligatori",
+          "I campi 'nome' e 'email','codiceFiscale','sesso','password'sono obbligatori",
       });
     }
     if (telefono && !/^\d{10}$/.test(telefono)) {
@@ -96,6 +111,7 @@ router.post("/", async (req, res) => {
       sesso,
       dataNascita,
       telefono,
+      password,
     });
     res.status(201).json(nuovoUtente);
   } catch (errore) {

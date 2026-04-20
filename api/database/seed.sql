@@ -3,12 +3,12 @@
 -- Inserisce gli stessi dati che avevamo nel vecchio database.js.
 -- Viene eseguito automaticamente da Docker al primo avvio.
 
-INSERT INTO utenti (id, nome, email, citta, codiceFiscale, sesso, dataNascita, telefono) VALUES
-(1, 'Mario Rossi',   'mario@email.com',  'Roma',    'RSSMRA80A01H501U', 'M', '1980-01-01', '3331234567'),
-(2, 'Luigi Verdi',   'luigi@email.com',  'Milano',  'VRDLGU85B15F205X', 'M', '1985-02-15', '3342345678'),
-(3, 'Peach Bianchi', 'peach@email.com',  'Napoli',  'BNCPEA90C20F839Y', 'F', '1990-03-20', '3353456789'),
-(4, 'Toad Gialli',   'toad@email.com',   'Torino',  'GLLTDA95D10L219Z', 'Altro', '1995-04-10', NULL),
-(5, 'Bowser Neri',   'bowser@email.com', 'Firenze', 'NRIBWS88E25D612K', 'M', '1988-05-25', '3364567890');
+INSERT INTO utenti (id, nome, email, citta, codiceFiscale, sesso, dataNascita, telefono, password ) VALUES
+(1, 'Mario Rossi',   'mario@email.com',  'Roma',    'RSSMRA80A01H501U', 'M', '1980-01-01', '3331234567', '$2b$10$EPY9L99p38v9V5A.Zg3vnuY8C6yE5E5E5E5E5E5E5E5E5E5E5E5E.'),
+(2, 'Luigi Verdi',   'luigi@email.com',  'Milano',  'VRDLGU85B15F205X', 'M', '1985-02-15', '3342345678', '$2b$10$EPY9L99p38v9V5A.Zg3vnuY8C6yE5E5E5E5E5E5E5E5E5E5E5E5E.'),
+(3, 'Peach Bianchi', 'peach@email.com',  'Napoli',  'BNCPEA90C20F839Y', 'F', '1990-03-20', '3353456789', '$2b$10$EPY9L99p38v9V5A.Zg3vnuY8C6yE5E5E5E5E5E5E5E5E5E5E5E5E.'),
+(4, 'Toad Gialli',   'toad@email.com',   'Torino',  'GLLTDA95D10L219Z', 'Altro', '1995-04-10', NULL, '$2b$10$EPY9L99p38v9V5A.Zg3vnuY8C6yE5E5E5E5E5E5E5E5E5E5E5E5E.'),
+(5, 'Bowser Neri',   'bowser@email.com', 'Firenze', 'NRIBWS88E25D612K', 'M', '1988-05-25', '3364567890', '$2b$10$EPY9L99p38v9V5A.Zg3vnuY8C6yE5E5E5E5E5E5E5E5E5E5E5E5E.');
 
 INSERT INTO post (id, userId, titolo, corpo) VALUES
     (1, 1, 'Il mio primo post',          'Ciao a tutti! Questo è il mio primo post sulla piattaforma.'),
