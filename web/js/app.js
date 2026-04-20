@@ -1,7 +1,4 @@
 // js/app.js — Modulo principale
-//
-// Importa api.js e ui.js, gestisce navigazione, form e drill-down.
-
 import * as api from "./api.js";
 import * as ui from "./ui.js";
 
@@ -9,10 +6,11 @@ import * as ui from "./ui.js";
 // Stato drill-down
 // ============================================================
 
-let utenteSelezionato = null; // { id, nome }
-let postSelezionato = null; // { id, titolo }
+let utenteSelezionato = null;
+let postSelezionato = null;
 let paginaPost = 1;
 const limitePost = 5;
+let utenteInModifica = null;
 
 // ============================================================
 // Riferimenti DOM
@@ -35,6 +33,7 @@ const liste = {
   post: document.getElementById("lista-post"),
   commenti: document.getElementById("lista-commenti"),
 };
+
 const paginazionePost = document.createElement("div");
 paginazionePost.id = "paginazione-post";
 liste.post.after(paginazionePost);
@@ -89,17 +88,17 @@ navBottoni.commenti.addEventListener("click", async () => {
 });
 
 // ============================================================
-// Aggiorna statistiche
+// Statistiche
 // ============================================================
 
 async function aggiornaStatistiche() {
-  const [utenti, post, commenti] = await Promise.all([
+  const [utenti, postRisposta, commenti] = await Promise.all([
     api.ottieniUtenti(),
     api.ottieniPost(),
     api.ottieniCommenti(),
   ]);
   document.getElementById("statistiche").textContent =
-    `Utenti: ${utenti.length} | Post: ${post.length} | Commenti: ${commenti.length}`;
+    `Utenti: ${utenti.length} | Post: ${postRisposta.dati.length} | Commenti: ${commenti.length}`;
 }
 aggiornaStatistiche();
 
@@ -113,7 +112,7 @@ async function caricaUtenti() {
     ui.mostraUtenti(utenti, liste.utenti, {
       onVediPost: vediPostDiUtente,
       onElimina: eliminaUtente,
-      onModifica: attivaModalitaModifica, // aggiunto per l'esercizio 3
+      onModifica: attivaModalitaModifica,
     });
   } catch (err) {
     ui.mostraErrore(err.message, liste.utenti);
@@ -128,19 +127,21 @@ async function caricaPost(userId) {
       onVediCommenti: vediCommentiDiPost,
       onElimina: eliminaPost,
     });
+    renderPaginazione(risposta.totale);
   } catch (err) {
     ui.mostraErrore(err.message, liste.post);
   }
   aggiornaStatistiche();
 }
+
 function renderPaginazione(totale) {
   const totalePagine = Math.ceil(totale / limitePost);
 
   paginazionePost.innerHTML = `
-    <button id="btn-prev-post" ${paginaPost === 1 ? "disabled" : ""}>Precedente</button>
-    <span>Pagina ${paginaPost} di ${totalePagine}</span>
-    <button id="btn-next-post" ${paginaPost === totalePagine ? "disabled" : ""}>Successiva</button>
-  `;
+        <button id="btn-prev-post" ${paginaPost === 1 ? "disabled" : ""}>Precedente</button>
+        <span>Pagina ${paginaPost} di ${totalePagine}</span>
+        <button id="btn-next-post" ${paginaPost === totalePagine ? "disabled" : ""}>Successiva</button>
+    `;
 
   document.getElementById("btn-prev-post").onclick = async () => {
     if (paginaPost > 1) {
@@ -156,11 +157,6 @@ function renderPaginazione(totale) {
     }
   };
 }
-paginazionePost.innerHTML = `
-    <button id="btn-prev-post">Precedente</button>
-    <span>Pagina ${paginaPost} di ${totalePagine}</span>
-    <button id="btn-next-post">Successiva</button>
-  `;
 
 async function caricaCommenti(postId) {
   try {
@@ -230,7 +226,6 @@ async function eliminaUtente(id) {
   } catch (err) {
     ui.mostraErrore(err.message, liste.utenti);
   }
-  aggiornaStatistiche();
 }
 
 async function eliminaPost(id) {
@@ -241,7 +236,6 @@ async function eliminaPost(id) {
   } catch (err) {
     ui.mostraErrore(err.message, liste.post);
   }
-  aggiornaStatistiche();
 }
 
 async function eliminaCommento(id) {
@@ -252,16 +246,12 @@ async function eliminaCommento(id) {
   } catch (err) {
     ui.mostraErrore(err.message, liste.commenti);
   }
-  aggiornaStatistiche();
 }
 
 // ============================================================
-// Modifica utenti — esercizio 3
+// Modifica utenti
 // ============================================================
 
-let utenteInModifica = null; // contiene l'utente che stiamo modificando, null se stiamo creando
-
-// Chiamata quando si clicca "Modifica" su una card — popola il form con i dati dell'utente
 function attivaModalitaModifica(utente) {
   utenteInModifica = utente;
   document.getElementById("utente-nome").value = utente.nome;
@@ -273,7 +263,6 @@ function attivaModalitaModifica(utente) {
   document.getElementById("utente-telefono").value = utente.telefono || "";
 }
 
-// Riporta il form alla modalità creazione
 function resetFormUtente() {
   document.getElementById("form-utente").reset();
   utenteInModifica = null;
@@ -284,7 +273,7 @@ document.getElementById("btn-annulla-utente").addEventListener("click", () => {
 });
 
 // ============================================================
-// Form — Creazione e Modifica utenti (un solo listener)
+// Form — Creazione e Modifica utenti
 // ============================================================
 
 document.getElementById("form-utente").addEventListener("submit", async (e) => {
@@ -299,9 +288,7 @@ document.getElementById("form-utente").addEventListener("submit", async (e) => {
   const telefono = document.getElementById("utente-telefono").value.trim();
 
   const regexCF = /^[A-Z]{6}[0-9]{2}[A-Z][0-9]{2}[A-Z][0-9]{3}[A-Z]$/;
-  const cfUppercase = codiceFiscale.toUpperCase();
-
-  if (!regexCF.test(cfUppercase)) {
+  if (!regexCF.test(codiceFiscale.toUpperCase())) {
     ui.mostraErrore("Codice fiscale non valido", liste.utenti);
     return;
   }
@@ -318,22 +305,20 @@ document.getElementById("form-utente").addEventListener("submit", async (e) => {
 
   try {
     if (utenteInModifica) {
-      // modalità modifica → PUT
       await api.aggiornaUtente(utenteInModifica.id, dati);
       resetFormUtente();
     } else {
-      // modalità creazione → POST
       await api.creaUtente(dati);
       e.target.reset();
     }
-    await caricaUtenti(); // ricarica la lista in entrambi i casi
+    await caricaUtenti();
   } catch (err) {
     ui.mostraErrore(err.message, liste.utenti);
   }
 });
 
 // ============================================================
-// Form — Creazione post
+// Form — Post
 // ============================================================
 
 document.getElementById("form-post").addEventListener("submit", async (e) => {
@@ -355,7 +340,7 @@ document.getElementById("form-post").addEventListener("submit", async (e) => {
 });
 
 // ============================================================
-// Form — Creazione commenti
+// Form — Commenti
 // ============================================================
 
 document
@@ -380,13 +365,12 @@ document
   });
 
 // ============================================================
-// Ricerca - ricerca utenti in tempo reale
+// Ricerca utenti
 // ============================================================
 
 ricerca.utenti.addEventListener("input", (e) => {
   const testo = e.target.value.toLowerCase();
   const cards = document.querySelectorAll("#lista-utenti .card");
-
   cards.forEach((card) => {
     const contenuto = card.textContent.toLowerCase();
     card.style.display = contenuto.includes(testo) ? "" : "none";
@@ -394,7 +378,7 @@ ricerca.utenti.addEventListener("input", (e) => {
 });
 
 // ============================================================
-// Avvio — Carica la lista utenti all'apertura
+// Avvio
 // ============================================================
 
 caricaUtenti();
