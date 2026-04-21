@@ -10,18 +10,26 @@ const BASE_URL = "http://localhost:3000/api";
 // ============================================================
 
 async function chiamataApi(percorso, opzioni = {}) {
+  const token = localStorage.getItem("token");
+  const headers = {
+    "Content-Type": "application/json",
+    ...opzioni.headers,
+  };
+  if (token) headers["Authorization"] = `Bearer ${token}`;
+
   const risposta = await fetch(`${BASE_URL}${percorso}`, {
-    headers: { "Content-Type": "application/json" },
     ...opzioni,
+    headers,
   });
+  if (!risposta.ok) throw new Error((await risposta.json()).errore);
+  return risposta.json();
+}
 
-  const dati = await risposta.json();
-
-  if (!risposta.ok) {
-    throw new Error(dati.errore || "Errore sconosciuto");
-  }
-
-  return dati;
+export async function login(email, password) {
+  return chiamataApi("/auth/login", {
+    method: "POST",
+    body: JSON.stringify({ email, password }),
+  });
 }
 
 // ============================================================
