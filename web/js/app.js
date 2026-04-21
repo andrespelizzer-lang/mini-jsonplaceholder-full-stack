@@ -286,6 +286,7 @@ document.getElementById("form-utente").addEventListener("submit", async (e) => {
   const sesso = document.getElementById("utente-sesso").value;
   const dataNascita = document.getElementById("utente-nascita").value;
   const telefono = document.getElementById("utente-telefono").value.trim();
+  const password = document.getElementById("utente-password").value.trim();
 
   const regexCF = /^[A-Z]{6}[0-9]{2}[A-Z][0-9]{2}[A-Z][0-9]{3}[A-Z]$/;
   if (!regexCF.test(codiceFiscale.toUpperCase())) {
@@ -301,6 +302,7 @@ document.getElementById("form-utente").addEventListener("submit", async (e) => {
     sesso,
     dataNascita,
     telefono,
+    password,
   };
 
   try {
