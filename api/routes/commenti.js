@@ -5,6 +5,7 @@
 // Versione aggiornata: usa MySQL invece degli array in memoria.
 
 import { Router } from "express";
+import { richiediAutenticazione } from "../middleware/autenticazione.js";
 import {
   trovaCommenti,
   trovaCommentoPerId,

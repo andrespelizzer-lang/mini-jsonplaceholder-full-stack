@@ -20,6 +20,7 @@ CREATE TABLE IF NOT EXISTS utenti (
     dataNascita DATE,
     telefono VARCHAR(20),
     password VARCHAR(255) NOT NULL,
+    ruolo ENUM('utente', 'admin') NOT NULL DEFAULT 'utente',
     creatoIl TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

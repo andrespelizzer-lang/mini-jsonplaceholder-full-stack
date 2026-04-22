@@ -1,10 +1,6 @@
-// routes/post.js — Route per la risorsa Post
-//
-// Endpoint completo: /api/post (il prefisso è montato in server.js)
-//
-// Versione aggiornata: usa MySQL invece degli array in memoria.
-
+// routes/post.js — Versione Completa con Esercizio 12 (Ruoli e Ownership)
 import { Router } from "express";
+import { richiediAutenticazione } from "../middleware/autenticazione.js";
 import {
   trovaPost,
   trovaPostPerId,
@@ -17,13 +13,8 @@ import {
 const router = Router();
 
 // ============================================================
-// GET /api/post — Lista tutti i post
+// GET /api/post — Lista post con paginazione
 // ============================================================
-// Filtro opzionale: /api/post?userId=2
-//
-// Prima (array):    post.filter(p => p.userId === parseInt(userId))
-// Adesso (MySQL):   SELECT * FROM post WHERE userId = ?
-
 router.get("/", async (req, res) => {
   try {
     const { userId, page, limit } = req.query;
@@ -44,123 +35,111 @@ router.get("/", async (req, res) => {
 // ============================================================
 // GET /api/post/:id — Singolo post
 // ============================================================
-
 router.get("/:id", async (req, res) => {
   try {
     const id = parseInt(req.params.id);
     const elemento = await trovaPostPerId(id);
-
-    if (!elemento) {
-      return res.status(404).json({
-        errore: `Post con id ${id} non trovato`,
-      });
-    }
-
+    if (!elemento) return res.status(404).json({ errore: "Post non trovato" });
     res.json(elemento);
   } catch (errore) {
-    console.error("Errore GET /api/post/:id:", errore);
     res.status(500).json({ errore: "Errore interno del server" });
   }
 });
 
 // ============================================================
-// POST /api/post — Crea un nuovo post
+// POST /api/post — Crea post (Autorizzato)
 // ============================================================
-// Campi obbligatori nel body: "userId", "titolo", "corpo"
-
 router.post("/", richiediAutenticazione, async (req, res) => {
   try {
-    const { userId, titolo, corpo } = req.body;
+    const { titolo, corpo } = req.body;
+    if (!titolo || !corpo)
+      return res.status(400).json({ errore: "Campi mancanti" });
 
-    if (!userId || !titolo || !corpo) {
-      return res.status(400).json({
-        errore: "I campi 'userId', 'titolo' e 'corpo' sono obbligatori",
-      });
-    }
-
-    const nuovoPost = await creaPost({ userId, titolo, corpo });
+    // Usiamo req.utente.id dal token, più sicuro che passarlo dal body
+    const nuovoPost = await creaPost({ userId: req.utente.id, titolo, corpo });
     res.status(201).json(nuovoPost);
   } catch (errore) {
-    console.error("Errore POST /api/post:", errore);
     res.status(500).json({ errore: "Errore interno del server" });
   }
 });
 
 // ============================================================
-// PUT /api/post/:id — Sostituisce un post
+// PUT /api/post/:id — Sostituisce post (Ownership/Admin)
 // ============================================================
-// Campi obbligatori nel body: "userId", "titolo", "corpo"
-
 router.put("/:id", richiediAutenticazione, async (req, res) => {
   try {
     const id = parseInt(req.params.id);
-    const { userId, titolo, corpo } = req.body;
+    const postEsistente = await trovaPostPerId(id);
+    if (!postEsistente)
+      return res.status(404).json({ errore: "Post non trovato" });
 
-    if (!userId || !titolo || !corpo) {
-      return res.status(400).json({
-        errore: "I campi 'userId', 'titolo' e 'corpo' sono obbligatori",
-      });
+    const isAutore = postEsistente.userId === req.utente.id;
+    const isAdmin = req.utente.ruolo === "admin";
+
+    if (!isAutore && !isAdmin) {
+      return res
+        .status(403)
+        .json({ errore: "Non autorizzato a modificare questo post" });
     }
 
-    const aggiornato = await sostituisciPost(id, { userId, titolo, corpo });
-
-    if (!aggiornato) {
-      return res.status(404).json({
-        errore: `Post con id ${id} non trovato`,
-      });
-    }
-
+    const { titolo, corpo } = req.body;
+    const aggiornato = await sostituisciPost(id, {
+      userId: postEsistente.userId,
+      titolo,
+      corpo,
+    });
     res.json(aggiornato);
   } catch (errore) {
-    console.error("Errore PUT /api/post/:id:", errore);
     res.status(500).json({ errore: "Errore interno del server" });
   }
 });
 
 // ============================================================
-// PATCH /api/post/:id — Aggiorna parzialmente
+// PATCH /api/post/:id — Aggiorna post (Ownership/Admin)
 // ============================================================
-
 router.patch("/:id", richiediAutenticazione, async (req, res) => {
   try {
     const id = parseInt(req.params.id);
-    const { userId, titolo, corpo } = req.body;
+    const postEsistente = await trovaPostPerId(id);
+    if (!postEsistente)
+      return res.status(404).json({ errore: "Post non trovato" });
 
-    const elemento = await aggiornaPost(id, { userId, titolo, corpo });
+    const isAutore = postEsistente.userId === req.utente.id;
+    const isAdmin = req.utente.ruolo === "admin";
 
-    if (!elemento) {
-      return res.status(404).json({
-        errore: `Post con id ${id} non trovato`,
-      });
+    if (!isAutore && !isAdmin) {
+      return res.status(403).json({ errore: "Non autorizzato" });
     }
 
+    const { titolo, corpo } = req.body;
+    const elemento = await aggiornaPost(id, { titolo, corpo });
     res.json(elemento);
   } catch (errore) {
-    console.error("Errore PATCH /api/post/:id:", errore);
     res.status(500).json({ errore: "Errore interno del server" });
   }
 });
 
 // ============================================================
-// DELETE /api/post/:id — Elimina un post
+// DELETE /api/post/:id — Elimina post (Ownership/Admin)
 // ============================================================
-// Nota: grazie a ON DELETE CASCADE, eliminando un post
-// vengono eliminati automaticamente anche i suoi commenti.
-
 router.delete("/:id", richiediAutenticazione, async (req, res) => {
   try {
     const id = parseInt(req.params.id);
-    const rimosso = await eliminaPost(id);
+    const post = await trovaPostPerId(id);
+    if (!post) return res.status(404).json({ errore: "Post non trovato" });
 
-    if (!rimosso) {
-      return res.status(404).json({
-        errore: `Post con id ${id} non trovato`,
-      });
+    const isAutore = post.userId === req.utente.id;
+    const isAdmin = req.utente.ruolo === "admin";
+
+    if (!isAutore && !isAdmin) {
+      return res
+        .status(403)
+        .json({ errore: "Puoi modificare solo i tuoi post" });
     }
 
+    const rimosso = await eliminaPost(id);
     res.json({ messaggio: "Post eliminato", post: rimosso });
   } catch (errore) {
-    console.error("Errore DELETE /api/post/:id:", errore);
     res.status(500).json({ errore: "Errore interno del server" });
   }
 });

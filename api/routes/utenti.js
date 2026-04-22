@@ -7,6 +7,10 @@
 
 import { Router } from "express";
 import {
+  richiediAutenticazione,
+  richiediRuolo,
+} from "../middleware/autenticazione.js";
+import {
   trovaUtenti,
   trovaUtentePerId,
   creaUtente,
@@ -207,22 +211,27 @@ router.patch("/:id", richiediAutenticazione, async (req, res) => {
 // Nota: grazie a ON DELETE CASCADE, eliminando un utente
 // vengono eliminati automaticamente anche i suoi post e commenti.
 
-router.delete("/:id", richiediAutenticazione, async (req, res) => {
-  try {
-    const id = parseInt(req.params.id);
-    const rimosso = await eliminaUtente(id);
+router.delete(
+  "/:id",
+  richiediAutenticazione,
+  richiediRuolo("admin"),
+  async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const rimosso = await eliminaUtente(id);
 
-    if (!rimosso) {
-      return res.status(404).json({
-        errore: `Utente con id ${id} non trovato`,
-      });
+      if (!rimosso) {
+        return res.status(404).json({
+          errore: `Utente con id ${id} non trovato`,
+        });
+      }
+
+      res.json({ messaggio: "Utente eliminato", utente: rimosso });
+    } catch (errore) {
+      console.error("Errore DELETE /api/utenti/:id:", errore);
+      res.status(500).json({ errore: "Errore interno del server" });
     }
-
-    res.json({ messaggio: "Utente eliminato", utente: rimosso });
-  } catch (errore) {
-    console.error("Errore DELETE /api/utenti/:id:", errore);
-    res.status(500).json({ errore: "Errore interno del server" });
-  }
-});
+  },
+);
 
 export default router;

@@ -300,6 +300,17 @@ function aggiornaStatoLogin() {
     ? `Loggato come ${utente.nome}`
     : "Non sei autenticato";
 }
+
+const navLogout = document.getElementById("nav-logout");
+
+if (navLogout) {
+  navLogout.addEventListener("click", () => {
+    logout(); //
+    alert("Logout effettuato");
+    // torna alla sezione utenti dopo il logout
+    navBottoni.utenti.click();
+  });
+}
 // ============================================================
 // Form — Creazione e Modifica utenti
 // ============================================================
@@ -410,5 +421,5 @@ ricerca.utenti.addEventListener("input", (e) => {
 // ============================================================
 // Avvio
 // ============================================================
-
+aggiornaStatoLogin();
 caricaUtenti();
