@@ -100,45 +100,65 @@ export function mostraUtenti(utenti, contenitore, callbacks) {
  * @param {HTMLElement} contenitore
  * @param {{ onVediCommenti: Function, onElimina: Function }} callbacks
  */
-export function mostraPost(post, contenitore, callbacks) {
+export function mostraPost(post, contenitore, callbacks, utenteLoggato) {
+  // 1. Pulizia iniziale (evita duplicati se la funzione viene richiamata)
   pulisciContenitore(contenitore);
 
+  // 2. Controllo se ci sono dati
   if (post.length === 0) {
     mostraVuoto(contenitore, "Nessun post trovato");
     return;
   }
 
+  // 3. Ciclo su ogni post
   post.forEach((p) => {
+    // Gestione della data (presa dalla seconda funzione)
     const data = p.creatoIl
       ? new Date(p.creatoIl).toLocaleString("it-IT", {
           timeZone: "Europe/Rome",
         })
       : "-";
 
+    // --- LOGICA DI SICUREZZA (dalla prima funzione) ---
+    // Un utente può eliminare se: è loggato E (è il proprietario del post OPPURE è admin)
+    const puoEliminare =
+      utenteLoggato &&
+      (utenteLoggato.id === p.userId || utenteLoggato.ruolo === "admin");
+
+    // 4. Creazione dell'elemento DOM
     const card = document.createElement("div");
     card.className = "card";
-    card.innerHTML = `
-            <h3>${p.titolo}</h3>
-            <p>${p.corpo}</p>
-             <p><strong>Creato il:</strong> ${data}</p>
-            <div class="azioni">
-                <button class="btn-primario" data-azione="vedi-commenti">Vedi Commenti</button>
-                <button class="btn-pericolo" data-azione="elimina">Elimina</button>
-            </div>
-        `;
 
+    // Costruiamo l'HTML: il tasto elimina appare solo se puoEliminare è true
+    card.innerHTML = `
+        <h3>${p.titolo}</h3>
+        <p>${p.corpo}</p>
+        <p><small>Creato il: ${data}</small></p>
+        <div class="azioni">
+            <button class="btn-primario" data-azione="vedi-commenti">Vedi Commenti</button>
+            ${puoEliminare ? `<button class="btn-pericolo" data-azione="elimina">Elimina</button>` : ""}
+        </div>
+    `;
+
+    // 5. Aggancio dei Listener (Eventi)
+
+    // Listener per i commenti (sempre presente)
     card
       .querySelector('[data-azione="vedi-commenti"]')
-      .addEventListener("click", () => {
-        callbacks.onVediCommenti(p);
-      });
+      .addEventListener("click", () => callbacks.onVediCommenti(p));
 
-    card
-      .querySelector('[data-azione="elimina"]')
-      .addEventListener("click", () => {
-        callbacks.onElimina(p.id);
-      });
+    // Listener per elimina (SOLO se il tasto è stato creato)
+    if (puoEliminare) {
+      card
+        .querySelector('[data-azione="elimina"]')
+        .addEventListener("click", () => {
+          if (confirm("Sei sicuro di voler eliminare questo post?")) {
+            callbacks.onElimina(p.id);
+          }
+        });
+    }
 
+    // 6. Aggiunta della card al contenitore nella pagina
     contenitore.appendChild(card);
   });
 }

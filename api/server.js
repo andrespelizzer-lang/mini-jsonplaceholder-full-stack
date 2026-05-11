@@ -8,6 +8,8 @@ import routeUtenti from "./routes/utenti.js";
 import routePost from "./routes/post.js";
 import routeCommenti from "./routes/commenti.js";
 import authRouter from "./routes/auth.js";
+import helmet from "helmet";
+import rateLimit from "express-rate-limit";
 
 const app = express();
 const PORT = 3000;
@@ -17,7 +19,18 @@ const PORT = 3000;
 // ============================================================
 
 // Permette le richieste cross-origin (necessario per il frontend su porta diversa)
-app.use(cors());
+app.use(
+  cors({
+    origin: process.env.CORS_ORIGIN,
+    credentials: true,
+  }),
+);
+
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 5,
+  message: { errore: "Troppi tentativi, riprova tra 15 minuti" },
+});
 
 // Parsa automaticamente il body JSON delle richieste
 app.use(express.json());
@@ -29,6 +42,8 @@ app.use((req, res, next) => {
   next();
 });
 
+app.use(helmet());
+app.use("/api/auth/login", loginLimiter);
 // ============================================================
 // Montaggio delle route
 // ============================================================

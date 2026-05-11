@@ -87,6 +87,11 @@ navBottoni.commenti.addEventListener("click", async () => {
   await caricaCommenti();
 });
 
+function getUtenteLoggato() {
+  const raw = localStorage.getItem("utente");
+  return raw ? JSON.parse(raw) : null;
+}
+
 // ============================================================
 // Statistiche
 // ============================================================
@@ -311,6 +316,10 @@ if (navLogout) {
     navBottoni.utenti.click();
   });
 }
+
+const utente = getUtenteLoggato();
+const formNuovoUtente = document.getElementById("form-utente");
+formNuovoUtente.style.display = utente?.ruolo === "admin" ? "" : "none";
 // ============================================================
 // Form — Creazione e Modifica utenti
 // ============================================================
