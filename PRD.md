@@ -7,7 +7,6 @@ Migrate the `web/` folder from plain HTML/CSS/vanilla JavaScript to a Nuxt 3 app
 ## Current state (vanilla JS)
 
 The frontend is a single `index.html` with three JS modules:
-r
 
 - `api.js` — fetch wrapper, one function per API call, auto-injects JWT token from localStorage
 - `ui.js` — renders data into DOM using template literals and createElement
