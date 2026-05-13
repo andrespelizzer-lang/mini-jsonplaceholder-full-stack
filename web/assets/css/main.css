@@ -21,7 +21,10 @@
 }
 
 body {
-  font-family: system-ui, -apple-system, sans-serif;
+  font-family:
+    system-ui,
+    -apple-system,
+    sans-serif;
   background: var(--colore-sfondo);
   color: var(--colore-testo);
   line-height: 1.6;
@@ -209,14 +212,30 @@ body {
   transition: background 0.15s;
 }
 
-.btn-primario { background: var(--colore-primario); color: white; }
-.btn-primario:hover { background: var(--colore-primario-scuro); }
+.btn-primario {
+  background: var(--colore-primario);
+  color: white;
+}
+.btn-primario:hover {
+  background: var(--colore-primario-scuro);
+}
 
-.btn-pericolo { background: var(--colore-pericolo); color: white; }
-.btn-pericolo:hover { background: var(--colore-pericolo-scuro); }
+.btn-pericolo {
+  background: var(--colore-pericolo);
+  color: white;
+}
+.btn-pericolo:hover {
+  background: var(--colore-pericolo-scuro);
+}
 
-.btn-secondario { background: #f1f5f9; color: #1e293b; border: 1px solid var(--colore-bordo); }
-.btn-secondario:hover { background: #e2e8f0; }
+.btn-secondario {
+  background: #f1f5f9;
+  color: #1e293b;
+  border: 1px solid var(--colore-bordo);
+}
+.btn-secondario:hover {
+  background: #e2e8f0;
+}
 
 /* ============================================================
    Form
